@@ -4,75 +4,79 @@ import com.nukkitx.nbt.util.stream.LittleEndianDataInputStream;
 import com.nukkitx.nbt.util.stream.LittleEndianDataOutputStream;
 import com.nukkitx.nbt.util.stream.NetworkDataInputStream;
 import com.nukkitx.nbt.util.stream.NetworkDataOutputStream;
-
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
+import static java.util.Objects.requireNonNull;
 import java.util.StringJoiner;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static java.util.Objects.requireNonNull;
-
 public class NbtUtils {
-    public static final int MAX_DEPTH = 16;
+
+    public static final int MAX_DEPTH = 32;
+    private static final char[] HEX_CODE = "0123456789ABCDEF".toCharArray();
 
     private NbtUtils() {
     }
 
-    public static NBTInputStream createReader(InputStream stream, boolean internKeys, boolean internValues) {
+    public static NBTInputStream createReader(final InputStream stream, final boolean internKeys, final boolean internValues) {
         requireNonNull(stream, "stream");
         return new NBTInputStream(new DataInputStream(stream), internKeys, internValues);
     }
 
-    public static NBTInputStream createReaderLE(InputStream stream, boolean internKeys, boolean internValues) {
+    public static NBTInputStream createReaderLE(final InputStream stream, final boolean internKeys, final boolean internValues) {
         requireNonNull(stream, "stream");
         return new NBTInputStream(new LittleEndianDataInputStream(stream), internKeys, internValues);
     }
 
-    public static NBTInputStream createGZIPReader(InputStream stream, boolean internKeys, boolean internValues) throws IOException {
+    public static NBTInputStream createGZIPReader(final InputStream stream, final boolean internKeys, final boolean internValues) throws IOException {
         return createReader(new GZIPInputStream(stream), internKeys, internValues);
     }
 
-    public static NBTInputStream createNetworkReader(InputStream stream, boolean internKeys, boolean internValues) {
+    public static NBTInputStream createNetworkReader(final InputStream stream, final boolean internKeys, final boolean internValues) {
         requireNonNull(stream, "stream");
         return new NBTInputStream(new NetworkDataInputStream(stream), internKeys, internValues);
     }
 
-    public static NBTInputStream createReader(InputStream stream) {
+    public static NBTInputStream createReader(final InputStream stream) {
         return createReader(stream, false, false);
     }
 
-    public static NBTInputStream createReaderLE(InputStream stream) {
+    public static NBTInputStream createReaderLE(final InputStream stream) {
         return createReaderLE(stream, false, false);
     }
 
-    public static NBTInputStream createGZIPReader(InputStream stream) throws IOException {
+    public static NBTInputStream createGZIPReader(final InputStream stream) throws IOException {
         return createGZIPReader(stream, false, false);
     }
 
-    public static NBTInputStream createNetworkReader(InputStream stream) {
+    public static NBTInputStream createNetworkReader(final InputStream stream) {
         return createNetworkReader(stream, false, false);
     }
 
-    public static NBTOutputStream createWriter(OutputStream stream) {
+    public static NBTOutputStream createWriter(final OutputStream stream) {
         requireNonNull(stream, "stream");
         return new NBTOutputStream(new DataOutputStream(stream));
     }
 
-    public static NBTOutputStream createWriterLE(OutputStream stream) {
+    public static NBTOutputStream createWriterLE(final OutputStream stream) {
         requireNonNull(stream, "stream");
         return new NBTOutputStream(new LittleEndianDataOutputStream(stream));
     }
 
-    public static NBTOutputStream createGZIPWriter(OutputStream stream) throws IOException {
+    public static NBTOutputStream createGZIPWriter(final OutputStream stream) throws IOException {
         return createWriter(new GZIPOutputStream(stream));
     }
 
-    public static NBTOutputStream createNetworkWriter(OutputStream stream) {
+    public static NBTOutputStream createNetworkWriter(final OutputStream stream) {
         return new NBTOutputStream(new NetworkDataOutputStream(stream));
     }
 
-    public static String toString(Object o) {
+    public static String toString(final Object o) {
         if (o instanceof Byte) {
             return ((byte) o) + "b";
         } else if (o instanceof Short) {
@@ -90,14 +94,14 @@ public class NbtUtils {
         } else if (o instanceof String) {
             return "\"" + o + "\"";
         } else if (o instanceof int[]) {
-            StringJoiner joiner = new StringJoiner(", ");
-            for (int i : (int[]) o) {
+            final StringJoiner joiner = new StringJoiner(", ");
+            for (final int i : (int[]) o) {
                 joiner.add(i + "i");
             }
             return "[ " + joiner + " ]";
         } else if (o instanceof long[]) {
-            StringJoiner joiner = new StringJoiner(", ");
-            for (long l : (long[]) o) {
+            final StringJoiner joiner = new StringJoiner(", ");
+            for (final long l : (long[]) o) {
                 joiner.add(l + "l");
             }
             return "[ " + joiner + " ]";
@@ -105,22 +109,22 @@ public class NbtUtils {
         return o.toString();
     }
 
-    public static <T> T copy(T val) {
+    public static <T> T copy(final T val) {
         if (val instanceof byte[]) {
-            byte[] bytes = (byte[]) val;
+            final byte[] bytes = (byte[]) val;
             return (T) Arrays.copyOf(bytes, bytes.length);
         } else if (val instanceof int[]) {
-            int[] ints = (int[]) val;
+            final int[] ints = (int[]) val;
             return (T) Arrays.copyOf(ints, ints.length);
         } else if (val instanceof long[]) {
-            long[] longs = (long[]) val;
+            final long[] longs = (long[]) val;
             return (T) Arrays.copyOf(longs, longs.length);
         }
         return val;
     }
 
-    public static String indent(String string) {
-        StringBuilder builder = new StringBuilder("  " + string);
+    public static String indent(final String string) {
+        final StringBuilder builder = new StringBuilder("  " + string);
         for (int i = 2; i < builder.length(); i++) {
             if (builder.charAt(i) == '\n') {
                 builder.insert(i + 1, "  ");
@@ -130,11 +134,9 @@ public class NbtUtils {
         return builder.toString();
     }
 
-    private static final char[] HEX_CODE = "0123456789ABCDEF".toCharArray();
-
-    public static String printHexBinary(byte[] data) {
-        StringBuilder r = new StringBuilder(data.length << 1);
-        for (byte b : data) {
+    public static String printHexBinary(final byte[] data) {
+        final StringBuilder r = new StringBuilder(data.length << 1);
+        for (final byte b : data) {
             r.append(HEX_CODE[(b >> 4) & 0xF]);
             r.append(HEX_CODE[(b & 0xF)]);
         }
